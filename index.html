@@ -1,62 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Naishlink | Real AI</title>
-    <style>
-        body { background: linear-gradient(135deg, #00c6ff, #0072ff); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 450px; text-align: center; }
-        h1 { color: #0072ff; margin: 0; }
-        textarea { width: 100%; height: 100px; border: 2px solid #00c6ff; border-radius: 12px; padding: 12px; margin: 15px 0; font-size: 16px; outline: none; }
-        button { background: #0072ff; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        button:hover { background: #0056b3; }
-        #output { margin-top: 20px; padding: 15px; background: #f0f7ff; border-radius: 10px; color: #333; display: none; text-align: left; border-left: 5px solid #0072ff; }
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h1>Naishlink AI</h1>
-        <p>Real AI Professional Converter</p>
-        <textarea id="userInput" placeholder="e.g. tell him i can't come"></textarea>
-        <button id="btn" onclick="askAI()">Transform with Real AI</button>
-        <div id="output"></div>
-    </div>
+<script>
+    async function askAI() {
+        const input = document.getElementById('userInput').value;
+        const output = document.getElementById('output');
+        if(!input) return;
 
-    <script>
-        async function askAI() {
-            const input = document.getElementById('userInput').value;
-            const output = document.getElementById('output');
-            const btn = document.getElementById('btn');
+        output.style.display = "block";
+        output.innerText = "Naishlink is thinking...";
+
+        try {
+            const response = await fetch("https://huggingface.co", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ inputs: `Rewrite this professionally: "${input}"` })
+            });
+            const data = await response.json();
+            let result = data.generated_text || data[0].generated_text;
+            output.innerHTML = "<strong>Professional Version:</strong><br>" + result.split('"').pop().trim();
+        } catch (e) {
+            // BACKUP BRAIN (If Real AI is busy)
+            let backup = "I am writing to formally notify you that " + input + ".";
+            if(input.toLowerCase().includes("can't come")) backup = "I am unfortunately unable to attend as requested.";
+            if(input.toLowerCase().includes("thanks")) backup = "I would like to express my sincere appreciation.";
             
-            if(!input) return;
-
-            output.style.display = "block";
-            output.innerText = "Connecting to AI brain...";
-            btn.disabled = true;
-
-            try {
-                // Using a public free inference API
-                const response = await fetch("https://huggingface.co", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: `Rewrite this sentence to be professional and formal: "${input}"` })
-                });
-
-                const data = await response.json();
-                let result = data[0].generated_text;
-                
-                // Cleaning up the AI response
-                result = result.split('"').pop().trim();
-                
-                output.innerHTML = "<strong>Professional Version:</strong><br>" + result;
-            } catch (e) {
-                output.innerText = "The AI is currently resting. Try again in a minute!";
-            } finally {
-                btn.disabled = false;
-            }
+            output.innerHTML = "<strong>Professional Version (Backup):</strong><br>" + backup;
         }
-    </script>
-</body>
-</html>
+    }
+</script>
 
 
 
